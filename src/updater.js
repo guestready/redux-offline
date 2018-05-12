@@ -8,15 +8,16 @@ import type {
   OfflineAction,
   OfflineState,
   ResultAction,
-  Config
+  Config,
 } from './types';
 import {
   OFFLINE_STATUS_CHANGED,
   OFFLINE_SCHEDULE_RETRY,
   OFFLINE_COMPLETE_RETRY,
+  OFFLINE_SEND,
   OFFLINE_BUSY,
   RESET_STATE,
-  PERSIST_REHYDRATE
+  PERSIST_REHYDRATE,
 } from './constants';
 
 const initialState: OfflineState = {
@@ -28,25 +29,21 @@ const initialState: OfflineState = {
   retryScheduled: false,
   netInfo: {
     isConnectionExpensive: null,
-    reach: 'NONE'
-  }
+    reach: 'NONE',
+  },
 };
 
 const buildOfflineUpdater = (dequeue, enqueue) =>
   function offlineUpdater(
     state: OfflineState = initialState,
-    action:
-      | OfflineStatusChangeAction
-      | OfflineScheduleRetryAction
-      | ResultAction
-      | PersistRehydrateAction
+    action: OfflineStatusChangeAction | OfflineScheduleRetryAction | ResultAction | PersistRehydrateAction,
   ): OfflineState {
     // Update online/offline status
     if (action.type === OFFLINE_STATUS_CHANGED) {
       return {
         ...state,
         online: action.payload.online,
-        netInfo: action.payload.netInfo
+        netInfo: action.payload.netInfo,
       };
     }
 
@@ -58,7 +55,7 @@ const buildOfflineUpdater = (dequeue, enqueue) =>
         netInfo: state.netInfo,
         retryScheduled: initialState.retryScheduled,
         retryCount: initialState.retryCount,
-        busy: initialState.busy
+        busy: initialState.busy,
       };
     }
 
@@ -67,7 +64,7 @@ const buildOfflineUpdater = (dequeue, enqueue) =>
         ...state,
         busy: false,
         retryScheduled: true,
-        retryCount: state.retryCount + 1
+        retryCount: state.retryCount + 1,
       };
     }
 
@@ -75,11 +72,11 @@ const buildOfflineUpdater = (dequeue, enqueue) =>
       return { ...state, retryScheduled: false };
     }
 
-    if (
-      action.type === OFFLINE_BUSY &&
-      action.payload &&
-      typeof action.payload.busy === 'boolean'
-    ) {
+    if (action.type === OFFLINE_SEND) {
+      return { ...state, busy: true };
+    }
+
+    if (action.type === OFFLINE_BUSY && action.payload && typeof action.payload.busy === 'boolean') {
       return { ...state, busy: action.payload.busy };
     }
 
@@ -88,13 +85,13 @@ const buildOfflineUpdater = (dequeue, enqueue) =>
       const transaction = state.lastTransaction + 1;
       const stamped = (({
         ...action,
-        meta: { ...action.meta, transaction }
+        meta: { ...action.meta, transaction },
       }: any): OfflineAction);
       const { outbox } = state;
       return {
         ...state,
         lastTransaction: transaction,
-        outbox: enqueue(outbox, stamped)
+        outbox: enqueue(outbox, stamped),
       };
     }
 
@@ -105,7 +102,7 @@ const buildOfflineUpdater = (dequeue, enqueue) =>
         ...state,
         outbox: dequeue(outbox, action),
         retryCount: 0,
-        busy: false
+        busy: false,
       };
     }
 
@@ -113,7 +110,7 @@ const buildOfflineUpdater = (dequeue, enqueue) =>
       return {
         ...initialState,
         online: state.online,
-        netInfo: state.netInfo
+        netInfo: state.netInfo,
       };
     }
 
@@ -132,8 +129,6 @@ export const enhanceReducer = (reducer: any, config: $Shape<Config>) => {
       restState = config.offlineStateLens(state).set();
     }
 
-    return config
-      .offlineStateLens(reducer(restState, action))
-      .set(offlineUpdater(offlineState, action));
+    return config.offlineStateLens(reducer(restState, action)).set(offlineUpdater(offlineState, action));
   };
 };

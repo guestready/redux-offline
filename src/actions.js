@@ -2,7 +2,9 @@ import {
   OFFLINE_STATUS_CHANGED,
   OFFLINE_SCHEDULE_RETRY,
   OFFLINE_COMPLETE_RETRY,
-  OFFLINE_BUSY
+  OFFLINE_BUSY,
+  OFFLINE_SEND_RESULT,
+  OFFLINE_SEND
 } from './constants';
 
 export const networkStatusChanged = params => {
@@ -33,4 +35,15 @@ export const completeRetry = action => ({
 export const busy = isBusy => ({
   type: OFFLINE_BUSY,
   payload: { busy: isBusy }
+});
+
+export const offlineSend = action => ({
+  type: OFFLINE_SEND,
+  payload: action
+});
+
+export const offlineSendResult = (action, success, error, payload) => ({
+  type: OFFLINE_SEND_RESULT,
+  payload,
+  meta: { action, success, error }
 });

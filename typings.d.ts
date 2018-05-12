@@ -6,6 +6,7 @@ declare module '@redux-offline/redux-offline/lib/defaults' {
 }
 
 declare module '@redux-offline/redux-offline/lib/types' {
+  import { OFFLINE_SEND, OFFLINE_SEND_RESULT } from '@redux-offline/redux-offline/lib/constants'
   export interface ResultAction {
     meta: {
       completed: boolean;
@@ -28,6 +29,22 @@ declare module '@redux-offline/redux-offline/lib/types' {
     };
     payload?: object;
     type: string;
+  }
+
+  export interface OfflineSendAction {
+    type: OFFLINE_SEND;
+    payload?: any;
+    meta: {
+      action: OfflineAction;
+      success: boolean;
+      error?: any;
+    };
+  }
+
+  export interface OfflineSendResultAction {
+    type: OFFLINE_SEND_RESULT;
+    payload: OfflineAction;
+    meta?: any;
   }
 
   export interface NetInfo {
@@ -78,9 +95,7 @@ declare module '@redux-offline/redux-offline/lib/types' {
     detectNetwork: (callback: NetworkCallback) => void;
     discard: (error: any, action: OfflineAction, retries: number) => boolean;
     effect: (effect: any, action: OfflineAction) => Promise<any>;
-    offlineStateLens: (
-      state: any,
-    ) => { get: OfflineState, set: (offlineState?: OfflineState) => any };
+    offlineStateLens: (state: any) => { get: OfflineState; set: (offlineState?: OfflineState) => any };
     persist: (store: any) => any;
     persistAutoRehydrate: (config?: { [key: string]: any }) => (next: any) => any;
     persistCallback: (callback?: any) => any;
@@ -94,20 +109,36 @@ declare module '@redux-offline/redux-offline' {
 
   import { Config } from '@redux-offline/redux-offline/lib/types';
 
-  export const offline: (userConfig: Config) => (createStore: typeof createReduxStore) =>
-    <T extends { [key: string]: any }>(
+  export enum ActionTypes {
+    OFFLINE_SEND = 'OFFLINE_SEND',
+    OFFLINE_SEND_RESULT = 'OFFLINE_SEND_RESULT',
+  }
+
+  export const Actions = {
+    offlineSendResult: (action, success, error?, payload?) => OfflineSendResultAction;
+  }
+
+  export const offline: (
+    userConfig: Config,
+  ) => (
+    createStore: typeof createReduxStore,
+  ) => <T extends { [key: string]: any }>(
+    reducer: (state: T, action: any) => T,
+    preloadedState: T,
+    enhancer: StoreEnhancer<T>,
+  ) => Store<T>;
+
+  export const createOffline: (
+    userConfig: Config,
+  ) => {
+    enhanceReducer: (reducer: any) => (state: any, action: any) => any;
+    enhanceStore: (
+      next: any,
+    ) => <T extends { [key: string]: any }>(
       reducer: (state: T, action: any) => T,
       preloadedState: T,
       enhancer: StoreEnhancer<T>,
     ) => Store<T>;
-
-  export const createOffline: (userConfig: Config) => ({
-    enhanceReducer: (reducer: any) => (state: any, action: any) => any,
-    enhanceStore: (next: any) => <T extends { [key: string]: any }>(
-      reducer: (state: T, action: any) => T,
-      preloadedState: T,
-      enhancer: StoreEnhancer<T>,
-    ) => Store<T>,
-    middleware: <A = any, R = any>(store: any) => (next: (action: A) => R) => (action: A) => R,
-  });
+    middleware: <A = any, R = any>(store: any) => (next: (action: A) => R) => (action: A) => R;
+  };
 }

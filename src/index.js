@@ -5,8 +5,9 @@ import type { Config } from './types';
 import { createOfflineMiddleware } from './middleware';
 import { enhanceReducer } from './updater';
 import { applyDefaults } from './config';
-import { networkStatusChanged } from './actions';
+import { networkStatusChanged, offlineSendResult } from './actions';
 import offlineActionTracker from './offlineActionTracker';
+import { OFFLINE_SEND, OFFLINE_SEND_RESULT } from './constants';
 
 // @TODO: Take createStore as config?
 const warnIfNotReduxAction = (config: $Shape<Config>, key: string) => {
@@ -136,3 +137,6 @@ export const createOffline = (userConfig: $Shape<Config> = {}) => {
     enhanceStore
   };
 };
+
+export const ActionTypes = { OFFLINE_SEND, OFFLINE_SEND_RESULT };
+export const Actions = { offlineSendResult };
