@@ -43,7 +43,7 @@ const processResult = async (resultAction, config, retries) => {
       meta: { ...config.defaultCommit.meta, offlineAction: action }
     };
     try {
-      return complete(commitAction, true, action.payload, action, config);
+      return complete(commitAction, true, resultAction.payload, action, config);
     } catch (error) {
       return complete(
         { type: JS_ERROR, meta: { error } },
