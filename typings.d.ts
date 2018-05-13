@@ -114,7 +114,7 @@ declare module '@redux-offline/redux-offline' {
     OFFLINE_SEND_RESULT = 'OFFLINE_SEND_RESULT',
   }
 
-  export const Actions = {
+  export const Actions: {
     offlineSendResult: (action, success, error?, payload?) => OfflineSendResultAction;
   }
 
