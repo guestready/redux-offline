@@ -61,6 +61,7 @@
     "redux-persist": "^4.5.0"
   },
   "peerDependencies": {
-    "redux": ">=3"
+    "redux": ">=3",
+    "@react-native-community/netinfo": ">=5"
   }
 }
