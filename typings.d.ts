@@ -1,11 +1,11 @@
-declare module '@redux-offline/redux-offline/lib/defaults' {
-  import { Config } from '@redux-offline/redux-offline/lib/types';
+declare module '@redux-offline/redux-offline/src/defaults' {
+  import { Config } from '@redux-offline/redux-offline/src/types';
 
   const config: Config;
   export default config;
 }
 
-declare module '@redux-offline/redux-offline/lib/types' {
+declare module '@redux-offline/redux-offline/src/types' {
   export interface ResultAction {
     meta: {
       completed: boolean;
@@ -92,7 +92,7 @@ declare module '@redux-offline/redux-offline/lib/types' {
 declare module '@redux-offline/redux-offline' {
   import { createStore as createReduxStore, Store, StoreEnhancer } from 'redux';
 
-  import { Config } from '@redux-offline/redux-offline/lib/types';
+  import { Config } from '@redux-offline/redux-offline/src/types';
 
   export const offline: (userConfig: Config) => (createStore: typeof createReduxStore) =>
     <T extends { [key: string]: any }>(
